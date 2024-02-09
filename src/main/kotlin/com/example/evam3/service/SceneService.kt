@@ -26,12 +26,16 @@ class SceneService {
         try {
             filmRepository.findById(scene.filmId)
                 ?: throw Exception("El ID de película proporcionado no se encuentra en nuestra base de datos.")
+
             scene.title?.takeIf { it.trim().isNotEmpty() }
                 ?: throw Exception("El título de la escena no puede estar vacío. Por favor, proporcione un título válido.")
+
             scene.description?.takeIf { it.trim().isNotEmpty() }
                 ?: throw Exception("La descripción de la escena no puede estar vacía. Por favor, proporcione una descripción válida.")
+
             scene.budget?.takeIf { it > 0.00 }
                 ?: throw Exception("El presupuesto de la escena debe ser mayor a 0. Por favor, proporcione un presupuesto válido.")
+
             scene.minutes?.takeIf { it > 0.00 }
                 ?: throw Exception("La duración de la escena en minutos debe ser mayor a 0. Por favor, proporcione una duración válida.")
 

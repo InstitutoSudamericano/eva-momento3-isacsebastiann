@@ -1,7 +1,6 @@
 package com.example.evam3.controller
 
 import com.example.evam3.entity.Character
-import com.example.evam3.entity.Scene
 import com.example.evam3.service.CharacterService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus

@@ -3,11 +3,13 @@ CREATE TABLE IF NOT EXISTS film(
    title VARCHAR (100),
     director VARCHAR (100),
     duration INT,
+    location VARCHAR(200),
     PRIMARY KEY (id)
     );
 
 CREATE TABLE IF NOT EXISTS scene(
     id SERIAL,
+    title VARCHAR(100),
     description VARCHAR (100),
     budget DECIMAL(10,2) NOT NULL,
     minutes INT,
@@ -20,7 +22,7 @@ CREATE TABLE IF NOT EXISTS character(
     id SERIAL,
     description VARCHAR (100),
     cost DECIMAL(10,2) NOT NULL,
-    side VARCHAR (100),
+    race VARCHAR (100),
     scene_id INT,
     PRIMARY KEY (id),
     FOREIGN KEY (scene_id) REFERENCES scene(id)

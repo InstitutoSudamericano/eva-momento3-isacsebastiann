@@ -16,8 +16,5 @@ class Film {
 
     var duration: Long? = null
 
-    @Column(name = "release_year")
-    var releaseYear: Int? = null
-
-    var rating: Int? = null
+    /*var rating: Int? = null*/
 }

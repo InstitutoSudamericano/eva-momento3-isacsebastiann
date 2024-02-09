@@ -27,9 +27,6 @@ class FilmService {
             film.duration?.takeIf { it > 0.00 }
                 ?: throw Exception("La duración debe ser mayor a cero, como el viaje desde Hobbiton hasta Mordor.")
 
-            film.releaseYear?.takeIf { it != null }
-                ?: throw Exception("La era de lanzamiento no puede ser desconocida, como los senderos del Bosque Viejo.")
-
             return filmRepository.save(film)
         } catch (ex: Exception) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, ex.message)
