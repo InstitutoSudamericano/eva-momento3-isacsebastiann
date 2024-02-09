@@ -1,41 +1,27 @@
--- Film
-CREATE TABLE IF NOT EXISTS Film (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255),
-    director VARCHAR(255),
+CREATE TABLE IF NOT EXISTS film(
+   id SERIAL,
+   title VARCHAR (100),
+    director VARCHAR (100),
     duration INT,
-    year_of_release INT,
-    genre VARCHAR(255),
-    rating VARCHAR(10),
-    production_country VARCHAR(255),
-    awards TEXT,
-    synopsis TEXT
+    PRIMARY KEY (id)
     );
 
--- Scene
-CREATE TABLE IF NOT EXISTS Scene (
-     id SERIAL PRIMARY KEY,
-     description TEXT,
-     budget DECIMAL,
-     minutes INT,
-     location VARCHAR(255),
-    filming_date DATE,
-    key_characters TEXT,
+CREATE TABLE IF NOT EXISTS scene(
+    id SERIAL,
+    description VARCHAR (100),
+    budget DECIMAL(10,2) NOT NULL,
+    minutes INT,
     film_id INT,
-    FOREIGN KEY (film_id) REFERENCES Film(id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (film_id) REFERENCES film(id)
     );
 
--- Character
-CREATE TABLE IF NOT EXISTS Character (
-     id SERIAL PRIMARY KEY,
-     name VARCHAR(255),
-    actor_name VARCHAR(255),
-    race VARCHAR(255),
-    alignment VARCHAR(255),
-    backstory TEXT,
-    appearance_in_films TEXT,
-    cost DECIMAL,
-    stock INT,
+CREATE TABLE IF NOT EXISTS character(
+    id SERIAL,
+    description VARCHAR (100),
+    cost DECIMAL(10,2) NOT NULL,
+    side VARCHAR (100),
     scene_id INT,
-    FOREIGN KEY (scene_id) REFERENCES Scene(id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (scene_id) REFERENCES scene(id)
     );

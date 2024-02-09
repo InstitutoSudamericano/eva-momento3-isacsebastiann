@@ -9,50 +9,55 @@ import org.springframework.web.server.ResponseStatusException
 
 @Service
 class FilmService {
-
     @Autowired
     lateinit var filmRepository: FilmRepository
 
-    fun list(): List<Film> {
+    fun list ():List<Film>{
         return filmRepository.findAll()
     }
 
     fun save(film: Film): Film {
-        validateFilm(film)
-        return filmRepository.save(film)
-    }
+        try {
+            film.title?.takeIf { it.trim().isNotEmpty() }
+                ?: throw Exception("Cada gran historia necesita un título. No dejes el tuyo en el olvido.")
 
-    fun update(id: Long, filmDetails: Film): Film {
-        val film = filmRepository.findById(id).orElseThrow {
-            ResponseStatusException(HttpStatus.NOT_FOUND, "Film not found with id: $id")
+            film.director?.takeIf { it.trim().isNotEmpty() }
+                ?: throw Exception("Detrás de cada gesta hay un director. ¿Quién guía la tuya?")
+
+            film.duration?.takeIf { it > 0.00 }
+                ?: throw Exception("La duración debe ser mayor a cero, como el viaje desde Hobbiton hasta Mordor.")
+
+            film.releaseYear?.takeIf { it != null }
+                ?: throw Exception("La era de lanzamiento no puede ser desconocida, como los senderos del Bosque Viejo.")
+
+            return filmRepository.save(film)
+        } catch (ex: Exception) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, ex.message)
         }
-
-        film.title = filmDetails.title.takeIf { !it.isNullOrBlank() } ?: film.title
-        film.director = filmDetails.director.takeIf { !it.isNullOrBlank() } ?: film.director
-        film.duration = filmDetails.duration ?: film.duration
-        film.yearOfRelease = filmDetails.yearOfRelease ?: film.yearOfRelease
-        film.genre = filmDetails.genre.takeIf { !it.isNullOrBlank() } ?: film.genre
-        film.rating = filmDetails.rating.takeIf { !it.isNullOrBlank() } ?: film.rating
-        film.productionCountry = filmDetails.productionCountry.takeIf { !it.isNullOrBlank() } ?: film.productionCountry
-        film.awards = filmDetails.awards ?: film.awards
-        film.synopsis = filmDetails.synopsis ?: film.synopsis
-
-        validateFilm(film)
-
-        return filmRepository.save(film)
     }
 
 
-    fun delete(id: Long) {
-        if (!filmRepository.existsById(id)) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Film not found with id: $id")
+    fun update(film: Film): Film{
+        try {
+            filmRepository.findById(film.id)
+                ?: throw Exception("ID no disponible")
+
+            return filmRepository.save(film)
         }
-        filmRepository.deleteById(id)
+        catch (ex:Exception){
+            throw ResponseStatusException(HttpStatus.NOT_FOUND,ex.message)
+        }
     }
 
-    private fun validateFilm(film: Film) {
-        if (film.title?.trim().isNullOrEmpty()) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Film title must not be empty")
+    fun delete (id: Long?):Boolean?{
+        try{
+            val response = filmRepository.findById(id)
+                ?: throw Exception("ID no disponible")
+            filmRepository.deleteById(id!!)
+            return true
+        }
+        catch (ex:Exception){
+            throw ResponseStatusException(HttpStatus.NOT_FOUND,ex.message)
         }
     }
 }

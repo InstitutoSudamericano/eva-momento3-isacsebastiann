@@ -1,58 +1,76 @@
 package com.example.evam3.service
 
 import com.example.evam3.entity.Scene
+import com.example.evam3.repository.FilmRepository
 import com.example.evam3.repository.SceneRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import java.util.*
 
 @Service
 class SceneService {
 
+
     @Autowired
     lateinit var sceneRepository: SceneRepository
 
-    fun listAll(): List<Scene> {
+    @Autowired
+    lateinit var filmRepository: FilmRepository
+
+    fun list ():List<Scene>{
         return sceneRepository.findAll()
     }
 
     fun save(scene: Scene): Scene {
-        validateScene(scene)
-        return sceneRepository.save(scene)
-    }
+        try {
+            filmRepository.findById(scene.filmId)
+                ?: throw Exception("El ID de película proporcionado no se encuentra en nuestra base de datos.")
+            scene.title?.takeIf { it.trim().isNotEmpty() }
+                ?: throw Exception("El título de la escena no puede estar vacío. Por favor, proporcione un título válido.")
+            scene.description?.takeIf { it.trim().isNotEmpty() }
+                ?: throw Exception("La descripción de la escena no puede estar vacía. Por favor, proporcione una descripción válida.")
+            scene.budget?.takeIf { it > 0.00 }
+                ?: throw Exception("El presupuesto de la escena debe ser mayor a 0. Por favor, proporcione un presupuesto válido.")
+            scene.minutes?.takeIf { it > 0.00 }
+                ?: throw Exception("La duración de la escena en minutos debe ser mayor a 0. Por favor, proporcione una duración válida.")
 
-    fun update(id: Long, updatedScene: Scene): Scene {
-        val scene = sceneRepository.findById(id).orElseThrow {
-            ResponseStatusException(HttpStatus.NOT_FOUND, "Scene not found with id: $id")
+            val film = filmRepository.findById(scene.filmId)
+            val currentTotalCost = sceneRepository.sumMinutesByFilmId(scene.filmId!!) ?: 0
+
+            if (film != null) {
+                if (currentTotalCost + (scene.minutes ?: 0) > (film.duration ?: 0)) {
+                    throw Exception("La duración total de las escenas excede la duración total de la película. Por favor, ajuste la duración de la escena.")
+                }
+            }
+            return sceneRepository.save(scene)
+        } catch (ex: Exception) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, ex.message)
         }
-
-        scene.description = updatedScene.description.takeUnless { it.isNullOrBlank() } ?: scene.description
-        scene.budget = updatedScene.budget ?: scene.budget
-        scene.minutes = updatedScene.minutes ?: scene.minutes
-        scene.location = updatedScene.location.takeUnless { it.isNullOrBlank() } ?: scene.location
-        scene.filmingDate = updatedScene.filmingDate ?: scene.filmingDate
-        scene.keyCharacters = updatedScene.keyCharacters.takeUnless { it.isNullOrBlank() } ?: scene.keyCharacters
-        validateScene(scene)
-        return sceneRepository.save(scene)
     }
 
-    fun delete(id: Long) {
-        if (!sceneRepository.existsById(id)) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Scene not found with id: $id")
+
+    fun update(scene: Scene): Scene {
+        try {
+            sceneRepository.findById(scene.id)
+                ?: throw Exception("ID no existe")
+
+            return sceneRepository.save(scene)
         }
-        sceneRepository.deleteById(id)
-    }
-
-    fun findById(id: Long): Optional<Scene> {
-        return sceneRepository.findById(id)
-    }
-
-    private fun validateScene(scene: Scene) {
-        if (scene.description.isNullOrBlank()) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Scene description must not be empty")
+        catch (ex:Exception){
+            throw ResponseStatusException(HttpStatus.NOT_FOUND,ex.message)
         }
-        // Add additional validation as necessary
+    }
+
+    fun delete (id: Long?):Boolean?{
+        try{
+            val response = sceneRepository.findById(id)
+                ?: throw Exception("ID no existe")
+            sceneRepository.deleteById(id!!)
+            return true
+        }
+        catch (ex:Exception){
+            throw ResponseStatusException(HttpStatus.NOT_FOUND,ex.message)
+        }
     }
 }

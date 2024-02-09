@@ -1,47 +1,37 @@
 package com.example.evam3.controller
 
 import com.example.evam3.entity.Character
+import com.example.evam3.entity.Scene
 import com.example.evam3.service.CharacterService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/characters")
 @CrossOrigin(methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.DELETE])
+@RequestMapping("/character")
 class CharacterController {
-
     @Autowired
-    private lateinit var characterService: CharacterService
+    lateinit var characterService: CharacterService
 
     @GetMapping
-    fun list(): ResponseEntity<List<Character>> {
-        val characters = characterService.listAll()
-        return ResponseEntity.ok(characters)
+    fun list (): ResponseEntity<*> {
+        return ResponseEntity(characterService.list(), HttpStatus.OK)
     }
 
     @PostMapping
-    fun save(@RequestBody character: Character): ResponseEntity<Character> {
-        val savedCharacter = characterService.save(character)
-        return ResponseEntity.status(201).body(savedCharacter)
+    fun save (@RequestBody character: Character): ResponseEntity<*> {
+        return ResponseEntity<Character>(characterService.save(character), HttpStatus.CREATED)
     }
 
-    @PutMapping("/{id}")
-    fun update(@PathVariable id: Long, @RequestBody character: Character): ResponseEntity<Character> {
-        val updatedCharacter = characterService.update(id, character)
-        return ResponseEntity.ok(updatedCharacter)
+    @PutMapping
+    fun update (@RequestBody character: Character):ResponseEntity<Character>{
+        return ResponseEntity(characterService.update(character), HttpStatus.OK)
     }
 
-    @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: Long): ResponseEntity<Void> {
-        characterService.delete(id)
-        return ResponseEntity.noContent().build()
-    }
-
-    @GetMapping("/{id}")
-    fun getById(@PathVariable id: Long): ResponseEntity<Character> {
-        val character = characterService.findById(id)
-        return character?.let { ResponseEntity.ok(it) }
-            ?: ResponseEntity.notFound().build()
+    @DeleteMapping("/delete/{id}")
+    fun delete (@PathVariable("id") id: Long):Boolean?{
+        return characterService.delete(id)
     }
 }
