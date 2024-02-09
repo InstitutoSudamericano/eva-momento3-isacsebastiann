@@ -1,0 +1,28 @@
+-- Crear la tabla Film
+CREATE TABLE Film (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255),
+    director VARCHAR(255),
+    duration INT
+    -- Agrega aquí más campos según sea necesario
+);
+
+-- Crear la tabla Scene
+CREATE TABLE Scene (
+    id SERIAL PRIMARY KEY,
+    description TEXT,
+    budget DECIMAL,
+    minutes INT,
+    -- Agrega aquí más campos según sea necesario
+    film_id INT REFERENCES Film(id) ON DELETE CASCADE
+);
+
+-- Crear la tabla Character
+CREATE TABLE Character (
+    id SERIAL PRIMARY KEY,
+    description TEXT,
+    cost DECIMAL,
+    stock INT,
+    -- Agrega aquí más campos según sea necesario
+    scene_id INT REFERENCES Scene(id) ON DELETE CASCADE
+);
